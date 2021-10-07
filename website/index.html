@@ -9,20 +9,18 @@
   </head>
   <body>
     <div id="app">
-      <div class="holder headline">
-        Weather Journal App
+      <div id="headline" class="holder"><b>Weather Journal App</b></div>
+      <div class="holder">
+        <label class="label" for="zip">Zip code</label>
+        <input type="text" id="zip_code_field" class="field" placeholder="Enter 5 digit value">
       </div>
-      <div class="holder zip">
-        <label for="zip">Zip code</label>
-        <input type="text" id="zip" placeholder="enter zip code here">
-      </div>
-      <div class="holder feel">
-        <label for="feelings">How are you feeling today?</label>
-        <textarea class="myInput" id="feelings" placeholder="Enter your feelings here" rows="9" cols="50"></textarea>
+      <div id="feelings_container" class="holder">
+        <label class="label" for="feelings">How are you feeling today?</label>
+        <textarea id="feelings_field" class="field" placeholder="Enter your feelings here" rows="9" cols="50"></textarea>
         <button id="generate" type="submit">Generate</button>
       </div>
-      <div class="holder entry">
-        <div class="title">Most Recent Entry</div>
+      <div class="holder">
+        <div class="entry">Most Recent Entry</div>
         <div id="entryHolder">
           <div id="date">Date</div>
           <div id="temp">temp</div>

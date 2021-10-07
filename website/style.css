@@ -1,27 +1,74 @@
+* { /* Used to keep width from expanding past limits of screen and introducing slight horizontal scrolling */
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 body {
-    background: #87ceeb;
+    margin: 0px;
+    width: 100%;
+    background: #87ceeb; /* sky blue */
     font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    padding-right: 5px;
+    /*border: 3px dashed black;*/
 }
 
 #app {
-    display: grid;
-    grid-auto-rows: minmax(150px, auto);
-    /* grid-template-columns:  */
-    height:100vh;
-    background: #f23557;
-    color: #f0d43a;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
-    grid-gap: 1em;
+    grid-gap: 20px;
     font-size: 20px;
     font-family: 'Oswald', sans-serif;
+}
+
+.field {
+  width: 100%;
+  padding-left: 5px;
+  border: 1px solid gray;
 }
 
 .holder {
 
 }
 
+.label {
+  padding-left: 5px;
+}
+
+#headline {
+  grid-area: headline;
+  color: black;
+  border: 2px solid black;
+  background-color: #f0d43a;
+  padding: 10px 0px;
+}
+
+.zip {
+  grid-area: zip;
+  border: 2px solid green;
+  margin-bottom: 10px;
+}
+
+.feel {
+  grid-area: feelings
+  border: 2px solid purple;
+}
+
 .entry {
+    grid-area: entry;
     background: rgba(59, 74, 107, .4);
+    border: 2px solid red;
+}
+
+#generate {
+  grid-area: button;
+  border: 2px solid blue;
+  height: 100%;
+  margin: 20px auto 10px auto;
+  display: block;
+  border-radius: 15px;
+  border-style: groove;
 }
 
 #entryHolder {
@@ -40,12 +87,8 @@ body {
 
 }
 
-.headline {
-
-}
-
-.title {
-
+#headline {
+  text-align: center;
 }
 
 /*  Basic Styling To Override Default For Basic HTML Elements */
@@ -57,19 +100,19 @@ label {
 input {
     display:block;
     height: 60px;
-    width: 320px;
+    width: 220px;
     background:#22b2da;
-    color: #f0d43a;
+    color: #f0d43a; /* shade of yellow */
     font-size: 20px;
     font-family: 'Oswald', sans-serif;
     border: none;
 }
 
 button {
-    width: 400px;
+    width: 200px;
     height: 100px;
     background: #3b4a6b;
-    color: #f0d43a;
+    color: #f0d43a; /* shade of yellow */
     font-size: 26px;
     font-family: 'Oswald', sans-serif;
     border: none;
