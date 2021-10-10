@@ -2,38 +2,45 @@
 const zipCodeField = document.getElementById('zip');
 const feelingsField = document.getElementById('feelings');
 
-const baseUrl = 'http://api.openweathermap.org/data/2.5/weather?zip=';
-const midUrl = ',us&appid=';  // *Assuming we only need to cover the United States, I added the 'us' instead of asking for a country code too
-const apiKey = 'a53b2d8dc37f7179eb7025f975cc83b2';
-
 document.getElementById('generate').addEventListener('click', generateButtonClickedHandler);
 
 function generateButtonClickedHandler() {
-  if (isEmpty(zipCodeField.value) || zipCodeField.value.length != 5)
-    alert('You need to enter a valid 5 digit zip code');
+  // Start with simple field validation before bothering to send off to server
+  if (zipCodeField.value.length != 5)
+    alert('You need to enter a 5 digit zip code, try again.');
   else if (isEmpty(feelingsField.value))
-    alert('You need to enter your feelings');
+    alert('You need to enter your feelings. Don\'t be shy.');
   else {
-    postData('/add', { "zipCode": `${zipCodeField.value}`, "feelings": `${feelingsField.value}` });
-    fetchJson('/last').then(result => {
-        document.getElementById('content').innerText = `Zip code: ${result.zipCode}\n
-          Feelings: ${result.feelings}`;
-        document.getElementById('date').innerText = `Date: ${getDate()}`;
-    });
+    // Now it's okay to submit the simpily validated form data
+    postData('/add', { "zipCode": `${zipCodeField.value}`, "feelings": `${feelingsField.value}` })
+    // Next check if the server processed it successfully
+    // Note that this could go wrong if the number passed in isn't actually a zip code- not all 5 digit values are
+    .then(postResult => {
+      let toJson = JSON.parse(postResult);
 
-    fetchJson(baseUrl + zipCodeField.value + midUrl + apiKey)
-    .then(temp => {
-        let tempF = kelvinToFahrenheit(temp.main.temp);
-        document.getElementById('temp').innerText = `Temp: ${tempF}` + '\xB0' + 'F';  // Add indication
+      if (toJson.success) {
+        return fetchJson('/last');
+      } else {
+        alert('Invalid zip code entered, try again');
+        throw new Error('invalid zip code provided'); // throw error so subsequent promise chain does not get executed- we skip to catch section below
+      }
     })
-    .catch(err => {
-      console.error('fetch failed', err);
+    // Finally use the logged results to update the last entry fields on the home page
+    .then(lastResult => {
+        if (lastResult !== undefined)
+          updateLastEntryContent(getDate(), lastResult.temp, lastResult.zipCode, lastResult.feelings);
+    })
+    .catch(error => {
+      console.log(`found error: ${error}`);
     });
   }
 }
 
-function kelvinToFahrenheit(tempInKelvin) {
-  return Math.trunc((tempInKelvin - 273.15) * (9 / 5) + 32);
+// Helper function to simplify the work of updating display, by accessing the html elements and setting their text values
+function updateLastEntryContent(date, temp, zipCode, feelings) {
+  document.getElementById('date').innerText = `Date: ${date}`;
+  document.getElementById('temp').innerText = `Temp: ${temp}` + '\xB0' + 'F';  // Add degrees F(ahrenheit) so users know units of measurement
+  document.getElementById('content').innerText = `Zip code: ${zipCode}\nFeelings: ${feelings}`;
 }
 
 function getDate() {
@@ -41,6 +48,7 @@ function getDate() {
   return `${d.getMonth()}/${d.getDate()}/${d.getFullYear()}`;
 }
 
+// Generic fetch helper method for trying to obtain a resource at a url and converting it to JSON format
 function fetchJson(url) {
   return fetch(url)
     .then(response => response.json())
@@ -63,7 +71,7 @@ const postData = async (url = '', data = {}) => {
       const rcvData = await response.json();
       return JSON.stringify(rcvData);
     } catch(error) {
-        console.log(error);
+        console.log(`Logging error in postData: ${error}`);
     }
 }
 
