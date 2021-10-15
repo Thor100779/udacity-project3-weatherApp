@@ -2,6 +2,11 @@
 const zipCodeField = document.getElementById('zip');
 const feelingsField = document.getElementById('feelings');
 
+// I was directed to communicate with the open weather API on client side instead of server side, so I'm moving that here now.
+const baseUrl = 'http://api.openweathermap.org/data/2.5/weather?zip=';
+const midUrl = ',us&appid=';  // *Assuming we only need to cover the United States, I added the 'us' instead of prompting for a country too
+const apiKey = 'a53b2d8dc37f7179eb7025f975cc83b2';
+
 document.getElementById('generate').addEventListener('click', generateButtonClickedHandler);
 
 function generateButtonClickedHandler() {
@@ -11,29 +16,38 @@ function generateButtonClickedHandler() {
   else if (isEmpty(feelingsField.value))
     alert('You need to enter your feelings. Don\'t be shy.');
   else {
-    // Now it's okay to submit the simpily validated form data
-    postData('/add', { "zipCode": `${zipCodeField.value}`, "feelings": `${feelingsField.value}` })
-    // Next check if the server processed it successfully
-    // Note that this could go wrong if the number passed in isn't actually a zip code- not all 5 digit values are
-    .then(postResult => {
-      let toJson = JSON.parse(postResult);
-
-      if (toJson.success) {
-        return fetchJson('/last');
-      } else {
-        alert('Invalid zip code entered, try again');
-        throw new Error('invalid zip code provided'); // throw error so subsequent promise chain does not get executed- we skip to catch section below
+    // First ensure the zip code is valid
+    fetchJson(`${baseUrl}${zipCodeField.value}${midUrl}${apiKey}`)
+    .then(apiResponse => {
+      if (apiResponse.message && apiResponse.message === 'city not found') {
+        alert('Invalid zip code provided, try again.');
+        throw new Error(`Invalid zip code provided: ${zipCodeField.value}`);
       }
+
+      let tempF = kelvinToFahrenheit(apiResponse.main.temp);
+      return postData('/add', { "zipCode": zipCodeField.value, "temp": tempF, "feelings": feelingsField.value });
     })
-    // Finally use the logged results to update the last entry fields on the home page
+    .then(addResponse => {
+      let toJson = JSON.parse(addResponse);
+
+      if (toJson.success)
+        return fetchJson("/last");
+
+      throw new Error('POST to /add route failed');
+    })
     .then(lastResult => {
-        if (lastResult !== undefined)
-          updateLastEntryContent(getDate(), lastResult.temp, lastResult.zipCode, lastResult.feelings);
+      updateLastEntryContent(getDate(), lastResult.temp, lastResult.zipCode, lastResult.feelings);
     })
     .catch(error => {
-      console.log(`found error: ${error}`);
+      console.log(error);
     });
   }
+}
+
+// The open weather API returns temperature values in degrees kelvin, but people typically don't use that unit of measurement
+// This helper method will convert to degrees Fahrenheit since I'm from the United States.
+function kelvinToFahrenheit(tempInKelvin) {
+  return Math.trunc((tempInKelvin - 273.15) * (9 / 5) + 32);
 }
 
 // Helper function to simplify the work of updating display, by accessing the html elements and setting their text values
