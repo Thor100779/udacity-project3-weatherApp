@@ -54,7 +54,7 @@ function updateLastEntryContent(date, temp, zipCode, feelings) {
 
 function getDate() {
   let d = new Date(); // Create a new date instance dynamically with JS
-  return `${d.getMonth()}/${d.getDate()}/${d.getFullYear()}`;
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
 
 // Generic fetch helper method for trying to obtain a resource at a url and converting it to JSON format
