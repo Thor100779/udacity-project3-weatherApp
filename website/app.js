@@ -6,6 +6,7 @@ const feelingsField = document.getElementById('feelings');
 const baseUrl = 'http://api.openweathermap.org/data/2.5/weather?zip=';
 const midUrl = ',us&appid=';  // *Assuming we only need to cover the United States, I added the 'us' instead of prompting for a country too
 const apiKey = 'a53b2d8dc37f7179eb7025f975cc83b2';
+const unitsUrl = '&units=imperial';
 
 document.getElementById('generate').addEventListener('click', generateButtonClickedHandler);
 
@@ -17,15 +18,15 @@ function generateButtonClickedHandler() {
     alert('You need to enter your feelings. Don\'t be shy.');
   else {
     // First ensure the zip code is valid
-    fetchJson(`${baseUrl}${zipCodeField.value}${midUrl}${apiKey}`)
+    fetchJson(`${baseUrl}${zipCodeField.value}${midUrl}${apiKey}${unitsUrl}`)
     .then(apiResponse => {
       if (apiResponse.message && apiResponse.message === 'city not found') {
         alert('Invalid zip code provided, try again.');
         throw new Error(`Invalid zip code provided: ${zipCodeField.value}`);
       }
 
-      let tempF = kelvinToFahrenheit(apiResponse.main.temp);
-      return postData('/add', { "zipCode": zipCodeField.value, "temp": tempF, "feelings": feelingsField.value });
+      // I'm using Math.trunc(ate) with the temperature because people don't casually talk about the weather in partial degrees
+      return postData('/add', { "zipCode": zipCodeField.value, "temp": Math.trunc(apiResponse.main.temp), "feelings": feelingsField.value });
     })
     .then(addResponse => {
       let toJson = JSON.parse(addResponse);
@@ -42,12 +43,6 @@ function generateButtonClickedHandler() {
       console.log(error);
     });
   }
-}
-
-// The open weather API returns temperature values in degrees kelvin, but people typically don't use that unit of measurement
-// This helper method will convert to degrees Fahrenheit since I'm from the United States.
-function kelvinToFahrenheit(tempInKelvin) {
-  return Math.trunc((tempInKelvin - 273.15) * (9 / 5) + 32);
 }
 
 // Helper function to simplify the work of updating display, by accessing the html elements and setting their text values
