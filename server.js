@@ -1,6 +1,6 @@
-// Setup empty JS ARRAY to act as endpoint for all routes
 // I prefer an array over an object to store a collection of entries, even though we only display the most recent one in this app
-projectData = [];
+// Reviewers insisted on an object so I switched back to that
+projectData = {};
 
 // Require Express to run server and routes
 const express = require('express');
@@ -29,16 +29,13 @@ app.listen(port, () => {
 
 // This route is used to get the last (successful) weather journal entry
 app.get('/last', (req, res) => {
-  if (projectData.length >= 1)
-    res.send(projectData[projectData.length - 1]);
-  else
-    res.send('No data to send');
+    res.send(projectData);
 });
 
 // Expecting the request body to contain the following fields: zipCode, temp, feelings
 app.post('/add', (req, res) => {
     if (req.body.zipCode && req.body.temp && req.body.feelings) {
-      projectData.push({ "zipCode": req.body.zipCode, "temp": req.body.temp, "feelings": req.body.feelings});
+      projectData = { "zipCode": req.body.zipCode, "temp": req.body.temp, "feelings": req.body.feelings};
       res.send({"success": true});
     }
     else {
